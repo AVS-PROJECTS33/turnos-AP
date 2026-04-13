@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Logística 2026 - v61</title>
+    <title>Turnos AP 2026 - v65</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -25,38 +25,50 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
 
-        /* Clase para turnos marcados en rojo en el Excel */
-        .card-rojo { background-color: #fee2e2 !important; border: 2px solid #ef4444 !important; color: #991b1b !important; }
-        .dark .card-rojo { background-color: #450a0a !important; border: 2px solid #f87171 !important; color: #fecaca !important; }
+        /* ESTILO PARA ALERTAS (ROJO EXTREMO) */
+        .card-alerta-roja { 
+            background-color: #fee2e2 !important; 
+            border: 3px solid #ef4444 !important; 
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+        .dark .card-alerta-roja { 
+            background-color: #450a0a !important; 
+            border: 3px solid #ff4d4d !important; 
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.3);
+        }
         
-        .card-noche { background-color: #000000 !important; color: #ffffff !important; border: 1px solid #333 !important; }
-        .dark .card-noche { border-color: #444 !important; }
+        .text-alerta-roja {
+            color: #b91c1c !important;
+            font-weight: 900 !important;
+        }
+        .dark .text-alerta-roja {
+            color: #fca5a5 !important;
+        }
 
+        /* Estilos base de tarjetas */
+        .card-noche { background-color: #000000 !important; color: #ffffff !important; border: 1px solid #333 !important; }
         .card-pm { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
         .card-pt { background-color: #dcfce7; border: 1px solid #86efac; color: #166534; }
         .card-ptt { background-color: #15803d; border: 1px solid #14532d; color: #ffffff; }
-        
         .card-cm { background-color: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
         .card-ct { background-color: #ffedd5; border: 1px solid #fdba74; color: #9a3412; }
         .card-ctt { background-color: #ea580c; border: 1px solid #9a3412; color: #ffffff; }
-        
         .card-vaca { background-color: #fef9c3; border: 1px solid #fef08a; color: #854d0e; }
         .card-comp { background-color: #f3e8ff; border: 1px solid #e9d5ff; color: #6b21a8; }
         .card-default { background-color: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; }
 
-        .dark .card-pm:not(.card-noche):not(.card-rojo) { background-color: #064e3b; color: #dcfce7; }
-        .dark .card-pt:not(.card-noche):not(.card-rojo) { background-color: #065f46; color: #dcfce7; }
-        .dark .card-ptt:not(.card-noche):not(.card-rojo) { background-color: #14532d; color: #ffffff; }
-        .dark .card-cm:not(.card-noche):not(.card-rojo) { background-color: #7c2d12; color: #ffedd5; }
-        .dark .card-ct:not(.card-noche):not(.card-rojo) { background-color: #9a3412; color: #ffedd5; }
-        .dark .card-ctt:not(.card-noche):not(.card-rojo) { background-color: #c2410c; color: #ffffff; }
+        .dark .card-pm:not(.card-noche):not(.card-alerta-roja) { background-color: #064e3b; color: #dcfce7; }
+        .dark .card-pt:not(.card-noche):not(.card-alerta-roja) { background-color: #065f46; color: #dcfce7; }
+        .dark .card-ptt:not(.card-noche):not(.card-alerta-roja) { background-color: #14532d; color: #ffffff; }
+        .dark .card-cm:not(.card-noche):not(.card-alerta-roja) { background-color: #7c2d12; color: #ffedd5; }
+        .dark .card-ct:not(.card-noche):not(.card-alerta-roja) { background-color: #9a3412; color: #ffedd5; }
+        .dark .card-ctt:not(.card-noche):not(.card-alerta-roja) { background-color: #c2410c; color: #ffffff; }
         .dark .card-vaca { background-color: #713f12; color: #fef9c3; border-color: #854d0e; }
 
         .current-week-card { outline: 4px solid #3b82f6; outline-offset: 2px; position: relative; z-index: 20; }
         .current-week-card::after {
             content: 'HOY'; position: absolute; top: -10px; right: -10px; background: #3b82f6;
             color: white; font-size: 9px; font-weight: 900; padding: 3px 6px; border-radius: 6px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
         .animate-fade-in { animation: fadeIn 0.4s ease-out; }
@@ -69,11 +81,11 @@
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <div class="bg-indigo-600 p-1.5 rounded-lg shadow-lg">
-                    <i class="fas fa-sync-alt text-white text-sm"></i>
+                    <i class="fas fa-calendar-alt text-white text-sm"></i>
                 </div>
                 <div>
-                    <h1 class="text-sm font-extrabold uppercase tracking-tight text-slate-800 dark:text-white">Sincro Turnos 2026</h1>
-                    <p class="text-[8px] font-bold text-indigo-500 leading-none">ESTADO: <span id="sync-status">ESPERANDO</span></p>
+                    <h1 class="text-sm font-extrabold uppercase tracking-tight text-slate-800 dark:text-white">Turnos AP 2026</h1>
+                    <p class="text-[8px] font-bold text-indigo-500 leading-none uppercase">v65 - <span id="sync-status">INACTIVO</span></p>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -86,59 +98,86 @@
 
     <main class="container mx-auto px-3 py-4">
         
+        <!-- Pantalla de Carga -->
         <div id="upload-state" class="flex flex-col items-center text-center py-10 px-4 animate-fade-in">
             <div class="bg-white dark:bg-darkCard p-8 rounded-[2.5rem] shadow-xl border dark:border-darkBorder w-full max-w-md">
                 <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-cloud-upload-alt text-2xl text-indigo-600 dark:text-indigo-400"></i>
+                    <i class="fas fa-file-excel text-2xl text-indigo-600 dark:text-indigo-400"></i>
                 </div>
-                <h3 class="font-black text-slate-800 dark:text-white uppercase text-lg">Sincronizar Excel</h3>
-                <p class="text-xs text-slate-500 mt-2 mb-8 text-balance italic">Selecciona el archivo "Turnos AP 2026.xlsx"</p>
+                <h3 class="font-black text-slate-800 dark:text-white uppercase text-lg">Subir Calendario</h3>
+                <p class="text-xs text-slate-500 mt-2 mb-8 italic">Selecciona el archivo Excel para actualizar</p>
                 <input type="file" id="file-input" class="hidden" accept=".xlsx">
                 <button onclick="document.getElementById('file-input').click()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform">
-                    Abrir Archivo
+                    Seleccionar Archivo
                 </button>
             </div>
         </div>
 
+        <!-- Selector de Usuario -->
         <div id="selector-container" class="mb-6 hidden animate-fade-in">
             <div class="flex justify-between items-center mb-2 px-1">
-                <label class="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Empleado Sincronizado</label>
-                <button onclick="resetApp()" class="text-[9px] font-bold text-red-400 uppercase">Cambiar archivo</button>
+                <label class="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Usuario</label>
+                <button onclick="resetApp()" class="text-[9px] font-bold text-red-400 uppercase">Reiniciar</button>
             </div>
             <select id="user-selector" class="w-full bg-white dark:bg-darkCard border-2 border-slate-200 dark:border-darkBorder rounded-2xl px-5 py-4 font-bold shadow-lg dark:text-white appearance-none text-lg outline-none focus:border-indigo-500 transition-colors">
-                <option value="">CARGANDO LISTA...</option>
+                <option value="">ELIJE TU NOMBRE</option>
             </select>
         </div>
 
+        <!-- Dashboard Principal -->
         <div id="dashboard" class="hidden space-y-4 animate-fade-in">
-            <div class="bg-white dark:bg-darkCard p-5 rounded-3xl shadow-sm border dark:border-darkBorder">
-                <div class="flex justify-between items-start">
+            <!-- Resumen y Header -->
+            <div class="bg-white dark:bg-darkCard p-6 rounded-[2.5rem] shadow-sm border dark:border-darkBorder">
+                <div class="flex justify-between items-start mb-6">
                     <div>
-                        <h2 id="view-title" class="text-3xl font-black uppercase leading-none tracking-tighter text-slate-800 dark:text-white">---</h2>
-                        <p class="text-[10px] font-bold text-slate-500 mt-2 uppercase">SEMANA ACTUAL: <span id="cur-week-span" class="text-indigo-600 dark:text-indigo-400 font-black">--</span></p>
+                        <h2 id="view-title" class="text-4xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">---</h2>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Hoy es Semana <span id="cur-week-span" class="text-indigo-600 dark:text-indigo-400 font-black">--</span></p>
+                        </div>
                     </div>
-                    <button onclick="scrollToCurrentWeek()" class="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 text-[10px] px-4 py-2 rounded-full font-black uppercase">
-                        Ver Hoy
+                    <button onclick="scrollToCurrentWeek()" class="bg-indigo-600 text-white text-[10px] px-6 py-3 rounded-2xl font-black uppercase shadow-lg shadow-indigo-200 dark:shadow-none active:scale-95 transition-transform">
+                        IR A HOY
                     </button>
                 </div>
 
-                <div id="stats-summary" class="grid grid-cols-4 gap-2 mt-4 pt-4 border-t dark:border-darkBorder text-center">
-                    <div><p class="text-[7px] font-bold text-slate-400 uppercase">M</p><p id="count-m" class="text-xs font-black">0</p></div>
-                    <div><p class="text-[7px] font-bold text-slate-400 uppercase">T</p><p id="count-t" class="text-xs font-black">0</p></div>
-                    <div><p class="text-[7px] font-bold text-slate-400 uppercase">N</p><p id="count-n" class="text-xs font-black">0</p></div>
-                    <div><p class="text-[7px] font-bold text-slate-400 uppercase">V/H</p><p id="count-v" class="text-xs font-black">0</p></div>
+                <!-- Totales -->
+                <div id="stats-summary" class="grid grid-cols-2 gap-3">
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-3xl border border-emerald-100 dark:border-emerald-800/30">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fas fa-sun text-emerald-500 text-[10px]"></i>
+                            <span class="text-[9px] font-black text-emerald-600/70 dark:text-emerald-400/70 uppercase">Mañanas</span>
+                        </div>
+                        <p id="count-m" class="text-3xl font-black text-emerald-700 dark:text-emerald-300">0</p>
+                    </div>
+                    <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-3xl border border-orange-100 dark:border-orange-800/30">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fas fa-cloud-sun text-orange-500 text-[10px]"></i>
+                            <span class="text-[9px] font-black text-orange-600/70 dark:text-orange-400/70 uppercase">Tardes</span>
+                        </div>
+                        <p id="count-t" class="text-3xl font-black text-orange-700 dark:text-orange-300">0</p>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-3xl border border-slate-800">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fas fa-moon text-indigo-400 text-[10px]"></i>
+                            <span class="text-[9px] font-black text-slate-400 uppercase">Noches</span>
+                        </div>
+                        <p id="count-n" class="text-3xl font-black text-white">0</p>
+                    </div>
+                    <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-3xl border border-amber-100 dark:border-amber-800/30">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fas fa-umbrella-beach text-amber-500 text-[10px]"></i>
+                            <span class="text-[9px] font-black text-amber-600/70 dark:text-amber-400/70 uppercase">Vaca/Comp/E</span>
+                        </div>
+                        <p id="count-v" class="text-3xl font-black text-amber-700 dark:text-amber-300">0</p>
+                    </div>
                 </div>
             </div>
 
+            <!-- Grid de Semanas -->
             <div id="wrapper_turnos" class="grid grid-cols-3 gap-3"></div>
         </div>
     </main>
-
-    <footer id="quick-nav" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex gap-2">
-        <button onclick="scrollToCurrentWeek()" class="bg-indigo-600 text-white px-6 py-3 rounded-full font-black shadow-2xl text-[10px] uppercase tracking-widest flex items-center gap-2">
-            <i class="fas fa-calendar-day"></i> IR A HOY
-        </button>
-    </footer>
 
     <script>
         const SHIFT_STYLES = {
@@ -148,7 +187,6 @@
         };
 
         const TARGET_NAMES = ["ANGY", "PACO", "IVAN", "JEAN", "NATALIA", "LUIS", "ALBERTO", "ENZO"];
-
         const MONTH_NAMES = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
 
         let db = [];
@@ -162,12 +200,9 @@
             return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
         }
 
-        // Función para obtener el mes aproximado de una semana en 2026
         function getMonthFromWeek(week) {
-            // El lunes de la semana 1 de 2026 fue el 29 de diciembre de 2025
-            // Pero para simplificar, calculamos basándonos en el jueves de la semana (regla ISO)
             const date = new Date(2026, 0, 1);
-            date.setDate(date.getDate() + (week - 1) * 7 + 3); 
+            date.setDate(date.getDate() + (week - 1) * 7 + 3);
             return MONTH_NAMES[date.getMonth()];
         }
         
@@ -189,7 +224,7 @@
                 const sheet = workbook.Sheets[sheetName];
                 const range = XLSX.utils.decode_range(sheet['!ref']);
                 
-                let globalWeekMap = {}; 
+                let globalWeekMap = {};
                 for (let r = range.s.r; r <= range.e.r; r++) {
                     for (let c = range.s.c; c <= range.e.c; c++) {
                         const cell = sheet[XLSX.utils.encode_cell({r: r, c: c})];
@@ -210,20 +245,16 @@
                     for (let r = range.s.r; r <= range.e.r; r++) {
                         const c0 = sheet[XLSX.utils.encode_cell({r: r, c: 0})];
                         const c1 = sheet[XLSX.utils.encode_cell({r: r, c: 1})];
-                        const c2 = sheet[XLSX.utils.encode_cell({r: r, c: 2})];
-                        if ((c0 && String(c0.v).trim().toUpperCase() === targetName) || 
-                            (c1 && String(c1.v).trim().toUpperCase() === targetName) ||
-                            (c2 && String(c2.v).trim().toUpperCase() === targetName)) {
+                        if ((c0 && String(c0.v).trim().toUpperCase().includes(targetName)) ||
+                            (c1 && String(c1.v).trim().toUpperCase().includes(targetName))) {
                             userRows.push(r);
                         }
                     }
 
-                    if (userRows.length === 0) return;
-
                     for (let w = 1; w <= 53; w++) {
                         let finalCode = "S/T";
                         let finalNote = null;
-                        let finalRed = false;
+                        let isAlert = false;
                         const weekPositions = globalWeekMap[w] || [];
                         
                         for (let pos of weekPositions) {
@@ -234,14 +265,19 @@
                                         const rawVal = String(cell.v).trim().toUpperCase();
                                         if (rawVal !== "" && rawVal !== "0" && isNaN(rawVal) && !TARGET_NAMES.includes(rawVal)) {
                                             finalCode = rawVal;
-                                            finalNote = (cell.c && cell.c.length > 0) ? cell.c[0].t : null;
                                             
+                                            // MEJORA: Detección de color y símbolo especial
+                                            if (rawVal.includes('+') || rawVal.includes('*')) isAlert = true;
+
                                             if (cell.s && cell.s.font && cell.s.font.color) {
                                                 const rgb = cell.s.font.color.rgb;
-                                                if (rgb === 'FFFF0000' || rgb === 'FF0000' || rgb === 'FFC00000') {
-                                                    finalRed = true;
+                                                // Códigos de rojo comunes en Excel
+                                                if (rgb && (rgb.startsWith('FF00') || rgb.includes('C00000') || rgb.includes('FFC000'))) {
+                                                    isAlert = true;
                                                 }
                                             }
+
+                                            if (cell.c && cell.c.length > 0) finalNote = cell.c[0].t.trim();
                                             break;
                                         }
                                     }
@@ -249,48 +285,40 @@
                             }
                             if (finalCode !== "S/T") break;
                         }
-
-                        syncResults.push({ user: targetName, week: w, code: finalCode, note: finalNote, red: finalRed });
+                        syncResults.push({ user: targetName, week: w, code: finalCode, note: finalNote, alert: isAlert });
                     }
                 });
 
                 if (syncResults.length > 0) {
                     db = syncResults;
-                    localStorage.setItem('sync_logistica_v61', JSON.stringify(db));
-                    document.getElementById('sync-status').textContent = "SINCRONIZADO";
-                    document.getElementById('sync-status').className = "text-green-500 font-black";
+                    localStorage.setItem('sync_turnosap_v65', JSON.stringify(db));
+                    document.getElementById('sync-status').textContent = "CONECTADO";
                     renderUI();
-                } else {
-                    alert("No se pudo extraer información.");
                 }
-            } catch (err) {
-                console.error(err);
-                alert("Error de lectura: " + err.message);
-            }
+            } catch (err) { alert("Error: " + err.message); }
         }
 
         function renderUI() {
             document.getElementById('upload-state').classList.add('hidden');
             const selector = document.getElementById('user-selector');
+            const saved = localStorage.getItem('turnosap_user_pref');
             const usersInDb = [...new Set(db.map(x => x.user))];
-            const saved = localStorage.getItem('logistica_user_pref');
-            selector.innerHTML = '<option value="">SELECCIONA TU NOMBRE</option>';
-            TARGET_NAMES.forEach(u => {
-                if (usersInDb.includes(u)) {
-                    const opt = document.createElement('option');
-                    opt.value = u; opt.textContent = u;
-                    if (u === saved) opt.selected = true;
-                    selector.appendChild(opt);
-                }
+            
+            selector.innerHTML = '<option value="">ELIJE TU NOMBRE</option>';
+            usersInDb.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u; opt.textContent = u;
+                if (u === saved) opt.selected = true;
+                selector.appendChild(opt);
             });
+            
             document.getElementById('selector-container').classList.remove('hidden');
-            document.getElementById('quick-nav').classList.remove('hidden');
-            if (saved && usersInDb.includes(saved)) loadDashboard(saved);
+            if (saved) loadDashboard(saved);
         }
 
         document.getElementById('user-selector').addEventListener('change', (e) => {
             if (!e.target.value) return;
-            localStorage.setItem('logistica_user_pref', e.target.value);
+            localStorage.setItem('turnosap_user_pref', e.target.value);
             loadDashboard(e.target.value);
         });
 
@@ -310,30 +338,54 @@
                 const baseCode = isNoche ? t.code.slice(0, -1) : t.code;
                 
                 if (!isEmpty) {
-                    if (t.code.includes('V') || t.code.includes('H')) stats.v++;
+                    if (t.code.includes('V') || t.code.includes('H') || t.code.includes('E')) {
+                        stats.v++;
+                    }
                     else if (isNoche) stats.n++;
                     else if (t.code.includes('M')) stats.m++;
                     else if (t.code.includes('T')) stats.t++;
                 }
 
-                let style = isEmpty ? 'bg-slate-100 dark:bg-slate-800/50 opacity-30 grayscale' : (SHIFT_STYLES[baseCode] || 'card-default');
-                if (isNoche) style += ' card-noche';
-                if (t.red) style = 'card-rojo';
+                let styleClass = isEmpty ? 'bg-slate-100 dark:bg-slate-800/50 opacity-30 grayscale' : (SHIFT_STYLES[baseCode] || 'card-default');
+                if (isNoche) styleClass += ' card-noche';
+                
+                // Aplicar Alerta Visual Prioritaria
+                if (t.alert) styleClass = 'card-alerta-roja';
 
                 const card = document.createElement('div');
                 const isCurrent = t.week === CURRENT_WEEK;
                 const monthName = getMonthFromWeek(t.week);
 
-                card.className = `${style} ${isCurrent ? 'current-week-card scale-105 shadow-xl' : ''} flex flex-col items-center justify-center py-6 px-2 rounded-[2rem] relative animate-fade-in transition-transform active:scale-95`;
+                card.className = `${styleClass} ${isCurrent ? 'current-week-card scale-105 shadow-xl' : ''} flex flex-col items-center justify-center py-6 px-1 rounded-[2.5rem] relative animate-fade-in transition-transform active:scale-95 cursor-pointer`;
                 
+                const noteBadge = t.note ? `
+                    <div class="mt-2 bg-black/10 dark:bg-white/10 px-3 py-1 rounded-full border border-black/5">
+                        <span class="text-[7px] font-black uppercase tracking-tighter text-slate-700 dark:text-white">NOTAS</span>
+                    </div>
+                ` : '';
+
+                const alertIcon = t.alert ? `
+                    <div class="absolute top-2 left-2 text-red-600 dark:text-red-400">
+                        <i class="fas fa-exclamation-circle text-xs animate-pulse"></i>
+                    </div>
+                ` : '';
+
+                const textClass = t.alert ? 'text-alerta-roja' : '';
+
                 card.innerHTML = `
-                    <span class="text-[9px] font-black opacity-50 uppercase mb-0.5 leading-none">${monthName}</span>
-                    <span class="text-[11px] font-extrabold opacity-30 uppercase mb-1 leading-none">Sem. ${t.week}</span>
-                    <span class="text-2xl font-black tracking-tighter">${isEmpty ? '---' : t.code}</span>
-                    ${t.note ? '<i class="fas fa-sticky-note absolute top-3 right-3 text-[10px] opacity-40"></i>' : ''}
+                    ${alertIcon}
+                    <span class="text-[8px] font-black opacity-40 uppercase mb-0.5">${monthName}</span>
+                    <span class="text-[10px] font-extrabold opacity-20 uppercase mb-1">Sem. ${t.week}</span>
+                    <span class="text-2xl font-black tracking-tighter ${textClass}">${isEmpty ? '---' : t.code}</span>
+                    ${noteBadge}
                 `;
 
-                if(t.note) card.onclick = () => alert(`NOTA SEMANA ${t.week}:\n${t.note}`);
+                card.onclick = () => {
+                    let msg = `SEMANA ${t.week}`;
+                    if (t.alert) msg += `\n⚠️ AVISO: Se ha detectado un cambio o turno especial (marcado en rojo/símbolo en Excel).`;
+                    if (t.note) msg += `\n\n📝 NOTA:\n${t.note}`;
+                    if (t.alert || t.note) alert(msg);
+                };
                 wrapper.appendChild(card);
             });
 
@@ -352,7 +404,7 @@
         }
 
         function resetApp() {
-            if(confirm("¿Sincronizar un nuevo archivo?")) {
+            if(confirm("¿Reiniciar datos?")) {
                 localStorage.clear();
                 location.reload();
             }
@@ -373,10 +425,10 @@
         window.onload = () => {
             if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
             updateThemeIcon();
-            const savedData = localStorage.getItem('sync_logistica_v61');
+            const savedData = localStorage.getItem('sync_turnosap_v65');
             if (savedData) {
                 db = JSON.parse(savedData);
-                document.getElementById('sync-status').textContent = "SINCRONIZADO";
+                document.getElementById('sync-status').textContent = "CONECTADO";
                 renderUI();
             }
         };
