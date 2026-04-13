@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -150,6 +149,8 @@
 
         const TARGET_NAMES = ["ANGY", "PACO", "IVAN", "JEAN", "NATALIA", "LUIS", "ALBERTO", "ENZO"];
 
+        const MONTH_NAMES = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+
         let db = [];
 
         function getWeekNumber() {
@@ -159,6 +160,15 @@
             date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
             const week1 = new Date(date.getFullYear(), 0, 4);
             return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+        }
+
+        // Función para obtener el mes aproximado de una semana en 2026
+        function getMonthFromWeek(week) {
+            // El lunes de la semana 1 de 2026 fue el 29 de diciembre de 2025
+            // Pero para simplificar, calculamos basándonos en el jueves de la semana (regla ISO)
+            const date = new Date(2026, 0, 1);
+            date.setDate(date.getDate() + (week - 1) * 7 + 3); 
+            return MONTH_NAMES[date.getMonth()];
         }
         
         const CURRENT_WEEK = getWeekNumber();
@@ -226,10 +236,8 @@
                                             finalCode = rawVal;
                                             finalNote = (cell.c && cell.c.length > 0) ? cell.c[0].t : null;
                                             
-                                            // Detección de color ROJO en la celda
                                             if (cell.s && cell.s.font && cell.s.font.color) {
                                                 const rgb = cell.s.font.color.rgb;
-                                                // Chequeamos variaciones comunes de rojo en Excel
                                                 if (rgb === 'FFFF0000' || rgb === 'FF0000' || rgb === 'FFC00000') {
                                                     finalRed = true;
                                                 }
@@ -308,17 +316,19 @@
                     else if (t.code.includes('T')) stats.t++;
                 }
 
-                // Lógica de estilo: Si red es true, forzamos card-rojo
                 let style = isEmpty ? 'bg-slate-100 dark:bg-slate-800/50 opacity-30 grayscale' : (SHIFT_STYLES[baseCode] || 'card-default');
                 if (isNoche) style += ' card-noche';
                 if (t.red) style = 'card-rojo';
 
                 const card = document.createElement('div');
                 const isCurrent = t.week === CURRENT_WEEK;
+                const monthName = getMonthFromWeek(t.week);
+
                 card.className = `${style} ${isCurrent ? 'current-week-card scale-105 shadow-xl' : ''} flex flex-col items-center justify-center py-6 px-2 rounded-[2rem] relative animate-fade-in transition-transform active:scale-95`;
                 
                 card.innerHTML = `
-                    <span class="text-[8px] font-black opacity-30 uppercase mb-1">Sem. ${t.week}</span>
+                    <span class="text-[9px] font-black opacity-50 uppercase mb-0.5 leading-none">${monthName}</span>
+                    <span class="text-[11px] font-extrabold opacity-30 uppercase mb-1 leading-none">Sem. ${t.week}</span>
                     <span class="text-2xl font-black tracking-tighter">${isEmpty ? '---' : t.code}</span>
                     ${t.note ? '<i class="fas fa-sticky-note absolute top-3 right-3 text-[10px] opacity-40"></i>' : ''}
                 `;
