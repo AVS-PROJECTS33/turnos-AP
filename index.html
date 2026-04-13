@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Turnos AP 2026 - v65</title>
+    <title>Turnos AP 2026 - v71</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -25,16 +25,16 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
 
-        /* ESTILO PARA FUENTE EN ROJO (CUANDO HAY 6-7 PERSONAS) */
-        .text-alerta-roja {
-            color: #ef4444 !important; /* Rojo intenso */
-            font-weight: 900 !important;
+        /* Estilo de alerta roja: PT en semanas críticas */
+        .text-alerta-roja { 
+            color: #ef4444 !important; 
+            font-weight: 900 !important; 
+            text-decoration: underline;
+            text-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
         }
-        .dark .text-alerta-roja {
-            color: #ff4d4d !important; /* Rojo vibrante en modo oscuro */
-        }
+        .dark .text-alerta-roja { color: #ff4d4d !important; }
 
-        /* Estilos base de tarjetas */
+        /* Colores de las tarjetas */
         .card-noche { background-color: #000000 !important; color: #ffffff !important; border: 1px solid #333 !important; }
         .card-pm { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
         .card-pt { background-color: #dcfce7; border: 1px solid #86efac; color: #166534; }
@@ -74,7 +74,7 @@
                 </div>
                 <div>
                     <h1 class="text-sm font-extrabold uppercase tracking-tight text-slate-800 dark:text-white">Turnos AP 2026</h1>
-                    <p class="text-[8px] font-bold text-indigo-500 leading-none uppercase">v65 - <span id="sync-status">INACTIVO</span></p>
+                    <p class="text-[8px] font-bold text-indigo-500 leading-none uppercase">v71 - <span id="sync-status">INACTIVO</span></p>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -86,15 +86,13 @@
     </nav>
 
     <main class="container mx-auto px-3 py-4">
-        
-        <!-- Pantalla de Carga -->
         <div id="upload-state" class="flex flex-col items-center text-center py-10 px-4 animate-fade-in">
             <div class="bg-white dark:bg-darkCard p-8 rounded-[2.5rem] shadow-xl border dark:border-darkBorder w-full max-w-md">
                 <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fas fa-file-excel text-2xl text-indigo-600 dark:text-indigo-400"></i>
                 </div>
-                <h3 class="font-black text-slate-800 dark:text-white uppercase text-lg">Subir Calendario</h3>
-                <p class="text-xs text-slate-500 mt-2 mb-8 italic">Selecciona el archivo Excel para actualizar</p>
+                <h3 class="font-black text-slate-800 dark:text-white uppercase text-lg">Subir Excel</h3>
+                <p class="text-xs text-slate-500 mt-2 mb-8 italic">Selecciona el archivo para cargar todos los turnos del año</p>
                 <input type="file" id="file-input" class="hidden" accept=".xlsx">
                 <button onclick="document.getElementById('file-input').click()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform">
                     Seleccionar Archivo
@@ -102,7 +100,6 @@
             </div>
         </div>
 
-        <!-- Selector de Usuario -->
         <div id="selector-container" class="mb-6 hidden animate-fade-in">
             <div class="flex justify-between items-center mb-2 px-1">
                 <label class="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Usuario</label>
@@ -113,24 +110,22 @@
             </select>
         </div>
 
-        <!-- Dashboard Principal -->
         <div id="dashboard" class="hidden space-y-4 animate-fade-in">
-            <!-- Resumen y Header -->
+            <!-- Estadísticas rápidas -->
             <div class="bg-white dark:bg-darkCard p-6 rounded-[2.5rem] shadow-sm border dark:border-darkBorder">
                 <div class="flex justify-between items-start mb-6">
                     <div>
                         <h2 id="view-title" class="text-4xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">---</h2>
                         <div class="flex items-center gap-2 mt-1">
                             <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Hoy es Semana <span id="cur-week-span" class="text-indigo-600 dark:text-indigo-400 font-black">--</span></p>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Semana Actual: <span id="cur-week-span" class="text-indigo-600 dark:text-indigo-400 font-black">--</span></p>
                         </div>
                     </div>
-                    <button onclick="scrollToCurrentWeek()" class="bg-indigo-600 text-white text-[10px] px-6 py-3 rounded-2xl font-black uppercase shadow-lg shadow-indigo-200 dark:shadow-none active:scale-95 transition-transform">
+                    <button onclick="scrollToCurrentWeek()" class="bg-indigo-600 text-white text-[10px] px-6 py-3 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform">
                         IR A HOY
                     </button>
                 </div>
 
-                <!-- Totales -->
                 <div id="stats-summary" class="grid grid-cols-2 gap-3">
                     <div class="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-3xl border border-emerald-100 dark:border-emerald-800/30">
                         <div class="flex items-center gap-2 mb-1">
@@ -156,14 +151,13 @@
                     <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-3xl border border-amber-100 dark:border-amber-800/30">
                         <div class="flex items-center gap-2 mb-1">
                             <i class="fas fa-umbrella-beach text-amber-500 text-[10px]"></i>
-                            <span class="text-[9px] font-black text-amber-600/70 dark:text-amber-400/70 uppercase">Vaca/Comp/E</span>
+                            <span class="text-[9px] font-black text-amber-600/70 dark:text-amber-400/70 uppercase">Vaca/H/E</span>
                         </div>
                         <p id="count-v" class="text-3xl font-black text-amber-700 dark:text-amber-300">0</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Grid de Semanas -->
             <div id="wrapper_turnos" class="grid grid-cols-3 gap-3"></div>
         </div>
     </main>
@@ -227,18 +221,23 @@
                     }
                 }
 
-                let syncResults = [];
-
-                TARGET_NAMES.forEach(targetName => {
-                    let userRows = [];
+                let userRowMap = {};
+                TARGET_NAMES.forEach(name => {
+                    userRowMap[name] = [];
                     for (let r = range.s.r; r <= range.e.r; r++) {
                         const c0 = sheet[XLSX.utils.encode_cell({r: r, c: 0})];
                         const c1 = sheet[XLSX.utils.encode_cell({r: r, c: 1})];
-                        if ((c0 && String(c0.v).trim().toUpperCase().includes(targetName)) ||
-                            (c1 && String(c1.v).trim().toUpperCase().includes(targetName))) {
-                            userRows.push(r);
+                        if ((c0 && String(c0.v).toUpperCase().includes(name)) ||
+                            (c1 && String(c1.v).toUpperCase().includes(name))) {
+                            userRowMap[name].push(r);
                         }
                     }
+                });
+
+                let syncResults = [];
+
+                TARGET_NAMES.forEach(targetName => {
+                    const userRows = userRowMap[targetName];
 
                     for (let w = 1; w <= 53; w++) {
                         let finalCode = "S/T";
@@ -246,45 +245,49 @@
                         let isAlert = false;
                         const weekPositions = globalWeekMap[w] || [];
                         
-                        let staffCount = 0;
                         for (let pos of weekPositions) {
-                             for (let r_check = pos.r + 1; r_check <= range.e.r; r_check++) {
-                                 const cell_check = sheet[XLSX.utils.encode_cell({r: r_check, c: pos.c})];
-                                 if (cell_check && cell_check.v !== undefined) {
-                                     const v = parseInt(cell_check.v);
-                                     if (v >= 5 && v <= 8) {
-                                         staffCount = v;
-                                         break;
-                                     }
-                                 }
-                             }
-                             if (staffCount > 0) break;
-                        }
+                            let staffCount = 0;
+                            for (let r_check = pos.r + 1; r_check <= pos.r + 12; r_check++) {
+                                const cell_check = sheet[XLSX.utils.encode_cell({r: r_check, c: pos.c})];
+                                if (cell_check && cell_check.v !== undefined) {
+                                    const v = parseInt(cell_check.v);
+                                    if (v >= 5 && v <= 8) {
+                                        staffCount = v;
+                                        break;
+                                    }
+                                }
+                            }
 
-                        for (let pos of weekPositions) {
+                            let closestRow = -1;
+                            let minDistance = 999;
                             for (let r of userRows) {
-                                if (Math.abs(r - pos.r) < 15) {
-                                    const cell = sheet[XLSX.utils.encode_cell({r: r, c: pos.c})];
-                                    if (cell && cell.v !== undefined) {
-                                        const rawVal = String(cell.v).trim().toUpperCase();
-                                        if (rawVal !== "" && rawVal !== "0" && isNaN(rawVal) && !TARGET_NAMES.includes(rawVal)) {
-                                            finalCode = rawVal;
-                                            
-                                            // REGLA: PT Rojo si staffCount es 6 o 7
-                                            if (rawVal === "PT" && (staffCount === 6 || staffCount === 7)) {
-                                                isAlert = true;
-                                            }
+                                let dist = Math.abs(r - pos.r);
+                                if (dist < minDistance && dist < 50) { 
+                                    minDistance = dist;
+                                    closestRow = r;
+                                }
+                            }
 
-                                            // REGLAS SECUNDARIAS (Excel)
-                                            if (rawVal.includes('+') || rawVal.includes('*')) isAlert = true;
-                                            if (cell.s && cell.s.font && cell.s.font.color) {
-                                                const rgb = cell.s.font.color.rgb;
-                                                if (rgb && (rgb.startsWith('FF00') || rgb.includes('C00000'))) isAlert = true;
-                                            }
-
-                                            if (cell.c && cell.c.length > 0) finalNote = cell.c[0].t.trim();
-                                            break;
+                            if (closestRow !== -1) {
+                                const cell = sheet[XLSX.utils.encode_cell({r: closestRow, c: pos.c})];
+                                if (cell && cell.v !== undefined) {
+                                    const rawVal = String(cell.v).trim().toUpperCase();
+                                    
+                                    if (rawVal !== "" && rawVal !== "0" && isNaN(rawVal) && !TARGET_NAMES.includes(rawVal)) {
+                                        finalCode = rawVal;
+                                        
+                                        if (rawVal === "PT" && (staffCount === 6 || staffCount === 7)) {
+                                            isAlert = true;
                                         }
+
+                                        if (rawVal.includes('+') || rawVal.includes('*')) isAlert = true;
+                                        if (cell.s && cell.s.font && cell.s.font.color) {
+                                            const rgb = cell.s.font.color.rgb;
+                                            if (rgb && (rgb.startsWith('FF00') || rgb.includes('C00000'))) isAlert = true;
+                                        }
+
+                                        if (cell.c && cell.c.length > 0) finalNote = cell.c[0].t.trim();
+                                        break;
                                     }
                                 }
                             }
@@ -296,11 +299,11 @@
 
                 if (syncResults.length > 0) {
                     db = syncResults;
-                    localStorage.setItem('sync_turnosap_v65', JSON.stringify(db));
+                    localStorage.setItem('sync_turnosap_v70', JSON.stringify(db));
                     document.getElementById('sync-status').textContent = "CONECTADO";
                     renderUI();
                 }
-            } catch (err) { alert("Error: " + err.message); }
+            } catch (err) { alert("Error al leer el archivo: " + err.message); }
         }
 
         function renderUI() {
@@ -349,24 +352,17 @@
                     else if (t.code.includes('T')) stats.t++;
                 }
 
-                // Estilo normal de la tarjeta
                 let styleClass = isEmpty ? 'bg-slate-100 dark:bg-slate-800/50 opacity-30 grayscale' : (SHIFT_STYLES[baseCode] || 'card-default');
                 if (isNoche) styleClass += ' card-noche';
                 
                 const card = document.createElement('div');
                 const isCurrent = t.week === CURRENT_WEEK;
                 const monthName = getMonthFromWeek(t.week);
+                const textClass = t.alert ? 'text-alerta-roja' : '';
 
                 card.className = `${styleClass} ${isCurrent ? 'current-week-card scale-105 shadow-xl' : ''} flex flex-col items-center justify-center py-6 px-1 rounded-[2.5rem] relative animate-fade-in transition-transform active:scale-95 cursor-pointer`;
                 
-                const noteBadge = t.note ? `
-                    <div class="mt-2 bg-black/10 dark:bg-white/10 px-3 py-1 rounded-full border border-black/5">
-                        <span class="text-[7px] font-black uppercase tracking-tighter text-slate-700 dark:text-white">NOTAS</span>
-                    </div>
-                ` : '';
-
-                // Aplicar solo color de fuente rojo si hay alerta
-                const textClass = t.alert ? 'text-alerta-roja' : '';
+                const noteBadge = t.note ? `<div class="mt-2 bg-black/10 dark:bg-white/10 px-3 py-1 rounded-full"><span class="text-[7px] font-black uppercase tracking-tighter text-slate-700 dark:text-white">NOTAS</span></div>` : '';
 
                 card.innerHTML = `
                     <span class="text-[8px] font-black opacity-40 uppercase mb-0.5">${monthName}</span>
@@ -377,9 +373,9 @@
 
                 card.onclick = () => {
                     let msg = `SEMANA ${t.week}`;
-                    if (t.alert) msg += `\n⚠️ AVISO: Turno marcado en rojo por capacidad de personas (6/7).`;
-                    if (t.note) msg += `\n\n📝 NOTA:\n${t.note}`;
-                    if (t.alert || t.note) alert(msg);
+                    if (t.note) msg += `\n\n📝 NOTA DEL EXCEL:\n${t.note}`;
+                    
+                    if (t.note) alert(msg);
                 };
                 wrapper.appendChild(card);
             });
@@ -399,7 +395,7 @@
         }
 
         function resetApp() {
-            if(confirm("¿Reiniciar datos?")) {
+            if(confirm("¿Seguro que quieres borrar todo y empezar de cero?")) {
                 localStorage.clear();
                 location.reload();
             }
@@ -420,7 +416,7 @@
         window.onload = () => {
             if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
             updateThemeIcon();
-            const savedData = localStorage.getItem('sync_turnosap_v65');
+            const savedData = localStorage.getItem('sync_turnosap_v70');
             if (savedData) {
                 db = JSON.parse(savedData);
                 document.getElementById('sync-status').textContent = "CONECTADO";
