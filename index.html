@@ -78,9 +78,9 @@
                 </div>
             </div>
             <div class="flex gap-2 items-center">
-                <!-- Botón de actualización: Se mostrará una vez haya datos guardados -->
-                <button id="btn-update-excel" onclick="document.getElementById('file-input').click()" class="hidden p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 transition-all active:scale-90 shadow-sm border border-emerald-200 dark:border-emerald-800" title="Actualizar Excel">
-                    <i class="fas fa-sync-alt text-xs"></i>
+                <!-- Botón de actualización: Modificado para forzar la descarga manual desde Dropbox -->
+                <button id="btn-update-excel" onclick="descargarDesdeDropbox(true)" class="hidden p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 transition-all active:scale-90 shadow-sm border border-emerald-200 dark:border-emerald-800" title="Sincronizar con Dropbox">
+                    <i id="sync-icon" class="fas fa-cloud-download-alt text-xs"></i>
                 </button>
                 <button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 transition-all active:scale-90">
                     <i id="theme-icon" class="fas fa-moon text-indigo-600 dark:text-yellow-400 text-xs"></i>
@@ -90,19 +90,21 @@
     </nav>
 
     <main class="container mx-auto px-3 py-4">
-        <!-- Input de archivo oculto (Se usa tanto para carga inicial como para actualizar) -->
+        <!-- Input de archivo oculto (Se mantiene por si se necesita uso local, aunque Dropbox es prioridad) -->
         <input type="file" id="file-input" class="hidden" accept=".xlsx">
 
+        <!-- Modificado para que el botón principal descargue de Dropbox en lugar de abrir archivo local -->
         <div id="upload-state" class="flex flex-col items-center text-center py-10 px-4 animate-fade-in">
             <div class="bg-white dark:bg-darkCard p-8 rounded-[2.5rem] shadow-xl border dark:border-darkBorder w-full max-w-md">
-                <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-file-excel text-2xl text-indigo-600 dark:text-indigo-400"></i>
+                <div class="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fab fa-dropbox text-2xl text-blue-600 dark:text-blue-400"></i>
                 </div>
-                <h3 class="font-black text-slate-800 dark:text-white uppercase text-lg">Subir Excel</h3>
-                <p class="text-xs text-slate-500 mt-2 mb-8 italic">Selecciona el archivo para cargar todos los turnos. Se guardarán en tu dispositivo automáticamente.</p>
-                <button onclick="document.getElementById('file-input').click()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform">
-                    Seleccionar Archivo
+                <h3 class="font-black text-slate-800 dark:text-white uppercase text-lg">Conectar Dropbox</h3>
+                <p class="text-xs text-slate-500 mt-2 mb-8 italic">Descarga los turnos más recientes directamente desde la nube de Dropbox.</p>
+                <button id="btn-initial-sync" onclick="descargarDesdeDropbox(true)" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                    <i class="fas fa-cloud-download-alt"></i> Sincronizar Ahora
                 </button>
+                <p class="text-[10px] text-slate-400 mt-4 cursor-pointer underline" onclick="document.getElementById('file-input').click()">O cargar archivo manualmente</p>
             </div>
         </div>
 
@@ -199,22 +201,75 @@
         
         const CURRENT_WEEK = getWeekNumber();
 
+        // Mantenemos la funcionalidad de carga manual por si falla Dropbox
         document.getElementById('file-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
             
-            document.getElementById('sync-status').textContent = "LEYENDO...";
+            document.getElementById('sync-status').textContent = "LEYENDO LOCAL...";
             
             const reader = new FileReader();
             reader.onload = (ev) => {
-                syncData(ev.target.result);
-                // Vaciamos el input para permitir subir el mismo archivo en el futuro si se editó
+                syncData(ev.target.result, "MANUAL");
                 e.target.value = ''; 
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function syncData(buffer) {
+        // NUEVA FUNCIÓN: Descarga directa desde Dropbox usando tu enlace convertido
+        function descargarDesdeDropbox(mostrarCargando = false) {
+            // Convertimos tu enlace original a formato de descarga directa (dl.dropboxusercontent.com)
+            // Tu enlace original: https://www.dropbox.com/scl/fi/7kcseuo2t2814swpmhyih/Turnos-2026.xlsx?rlkey=w72n8lzu2c00sa7us07teqf06&st=kf8tmmrg&dl=0
+            const urlDropbox = 'https://dl.dropboxusercontent.com/scl/fi/7kcseuo2t2814swpmhyih/Turnos-2026.xlsx?rlkey=w72n8lzu2c00sa7us07teqf06&st=kf8tmmrg';
+            
+            if (mostrarCargando) {
+                document.getElementById('sync-status').textContent = "DESCARGANDO NUBE...";
+                const btnSync = document.getElementById('btn-initial-sync');
+                if (btnSync) btnSync.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+                
+                const iconSync = document.getElementById('sync-icon');
+                if (iconSync) {
+                    iconSync.classList.remove('fa-cloud-download-alt');
+                    iconSync.classList.add('fa-spinner', 'fa-spin');
+                }
+            }
+
+            fetch(urlDropbox)
+                .then(respuesta => {
+                    if (!respuesta.ok) throw new Error("Error en red");
+                    return respuesta.arrayBuffer();
+                })
+                .then(buffer => {
+                    console.log("Archivo descargado de Dropbox correctamente");
+                    syncData(buffer, "DROPBOX");
+                    
+                    // Restaurar botones si es necesario
+                    const iconSync = document.getElementById('sync-icon');
+                    if (iconSync) {
+                        iconSync.classList.add('fa-cloud-download-alt');
+                        iconSync.classList.remove('fa-spinner', 'fa-spin');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error bajando de Dropbox:", error);
+                    document.getElementById('sync-status').textContent = db.length > 0 ? "OFFLINE (CACHÉ)" : "ERROR DE CONEXIÓN";
+                    
+                    if (mostrarCargando) {
+                        const btnSync = document.getElementById('btn-initial-sync');
+                        if (btnSync) btnSync.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Falló conexión';
+                        
+                        const iconSync = document.getElementById('sync-icon');
+                        if (iconSync) {
+                            iconSync.classList.add('fa-cloud-download-alt');
+                            iconSync.classList.remove('fa-spinner', 'fa-spin');
+                        }
+                        
+                        alert("No se pudo conectar con Dropbox. Verifica tu conexión a internet o el estado del archivo.");
+                    }
+                });
+        }
+
+        function syncData(buffer, origin = "DROPBOX") {
             try {
                 const data = new Uint8Array(buffer);
                 const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
@@ -331,21 +386,26 @@
                 if (syncResults.length > 0) {
                     db = syncResults;
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-                    document.getElementById('sync-status').textContent = "GUARDADO EN MÓVIL";
+                    document.getElementById('sync-status').textContent = origin === "DROPBOX" ? "SYNC NUBE OK" : "LOCAL OK";
                     renderUI();
                 } else {
-                    document.getElementById('sync-status').textContent = "ERROR AL LEER";
-                    alert("No se detectaron turnos válidos. Comprueba el formato de la hoja 2026.");
+                    document.getElementById('sync-status').textContent = "ERROR: VACÍO";
+                    if (origin !== "DROPBOX" || confirm("Dropbox devolvió datos vacíos. ¿Verificar formato?")) {
+                         alert("No se detectaron turnos válidos. Comprueba el formato de la hoja 2026.");
+                    }
                 }
             } catch (err) { 
                 document.getElementById('sync-status').textContent = "ERROR AL LEER";
-                alert("Error al leer el archivo: " + err.message); 
+                console.error(err);
+                if (origin !== "DROPBOX" || confirm("Error procesando Excel de Dropbox. ¿Ver detalles?")) {
+                    alert("Error al leer el archivo: " + err.message); 
+                }
             }
         }
 
         function renderUI() {
             document.getElementById('upload-state').classList.add('hidden');
-            document.getElementById('btn-update-excel').classList.remove('hidden'); // Mostramos el botón de actualizar
+            document.getElementById('btn-update-excel').classList.remove('hidden'); // Mostramos el botón de actualizar (ahora Dropbox)
             
             const selector = document.getElementById('user-selector');
             const saved = localStorage.getItem('turnosap_user_pref');
@@ -434,7 +494,7 @@
         }
 
         function resetApp() {
-            if(confirm("¿Seguro que quieres borrar la app del teléfono y empezar de cero? (Tendrás que volver a subir el Excel)")) {
+            if(confirm("¿Seguro que quieres borrar la app del teléfono y empezar de cero?")) {
                 localStorage.clear();
                 location.reload();
             }
@@ -457,10 +517,17 @@
             updateThemeIcon();
             
             const savedData = localStorage.getItem(STORAGE_KEY);
+            
             if (savedData) {
+                // Si ya hay datos, los mostramos rápido para no hacer esperar al usuario
                 db = JSON.parse(savedData);
-                document.getElementById('sync-status').textContent = "GUARDADO EN MÓVIL";
+                document.getElementById('sync-status').textContent = "CACHÉ LOCAL";
                 renderUI();
+                // Y luego sincronizamos de fondo por si hay cambios en Dropbox
+                descargarDesdeDropbox(false);
+            } else {
+                // Si es la primera vez que abre, no tiene datos guardados, muestra la pantalla inicial de Dropbox.
+                // Podríamos forzar la descarga automática aquí también llamando a descargarDesdeDropbox(true);
             }
         };
     </script>
