@@ -180,7 +180,7 @@
     <div id="shift-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in" onclick="this.classList.add('hidden')">
         <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-2xl max-w-sm w-full border dark:border-darkBorder relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
-                <h3 id="shift-modal-title" class="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">SEMANA --</h3>
+                <h3 id="shift-modal-title" class="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight flex items-center">SEMANA --</h3>
                 <button onclick="document.getElementById('shift-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -487,8 +487,19 @@
                 `;
 
                 card.onclick = () => {
+                    // Get ALL shifts for this week (including the current user)
+                    const weekShifts = db.filter(s => s.week === t.week);
+                    
+                    // Count total AP working
+                    let totalAP = 0;
+                    weekShifts.forEach(s => {
+                        if (s.code !== 'S/T' && !s.code.includes('V') && !s.code.includes('H') && !s.code.includes('E')) {
+                            totalAP++;
+                        }
+                    });
+
                     // Update Modal Title
-                    document.getElementById('shift-modal-title').textContent = `SEMANA ${t.week}`;
+                    document.getElementById('shift-modal-title').innerHTML = `SEMANA ${t.week} <span class="text-[11px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg text-slate-500 dark:text-slate-400 font-bold tracking-widest ml-2 align-middle">TOTAL AP (${totalAP})</span>`;
                     
                     // Update Modal Note
                     const noteEl = document.getElementById('shift-modal-note');
@@ -500,9 +511,6 @@
                         noteEl.classList.add('hidden');
                     }
 
-                    // Get ALL shifts for this week (including the current user)
-                    const weekShifts = db.filter(s => s.week === t.week);
-                    
                     // Sort order: PM, PT, PTT, CM, CT, CTT. Others (V, H, E, S/T, etc) go to bottom.
                     const customOrder = ['PM', 'PT', 'PTT', 'CM', 'CT', 'CTT'];
                     weekShifts.sort((a, b) => {
