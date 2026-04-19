@@ -187,10 +187,10 @@
             </div>
             <div id="shift-modal-note" class="hidden mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-2xl text-sm text-amber-800 dark:text-amber-200">
                 <p class="font-bold mb-1 uppercase text-[10px] tracking-wider"><i class="fas fa-sticky-note mr-1"></i> Nota del Excel</p>
-                <p id="shift-modal-note-text" class="whitespace-pre-wrap"></p>
+                <p id="shift-modal-note-text" class="whitespace-pre-wrap font-bold"></p>
             </div>
             <h4 class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Equipo</h4>
-            <div id="shift-modal-list" class="space-y-2">
+            <div id="shift-modal-list" class="space-y-1">
                 <!-- Lista inyectada por JS -->
             </div>
         </div>
@@ -536,10 +536,13 @@
                         const nameClass = isMe ? 'text-indigo-700 dark:text-indigo-400 font-black' : 'text-slate-700 dark:text-slate-300 font-bold';
 
                         const item = document.createElement('div');
-                        item.className = `flex justify-between items-center px-4 py-3 rounded-2xl ${rowClass}`;
+                        item.className = `flex justify-between items-center px-3 py-1.5 rounded-xl ${rowClass} gap-2`;
                         item.innerHTML = `
-                            <span class="text-sm ${nameClass}">${s.user} ${isMe ? '<span class="text-[10px] uppercase ml-1 opacity-60">(Tú)</span>' : ''}</span>
-                            <span class="${badgeClass} px-3 py-1 rounded-xl font-black text-sm tracking-tight shadow-sm border ${sTextClass}">${sIsEmpty ? '---' : s.code}</span>
+                            <div class="flex items-center gap-2 min-w-0 flex-1">
+                                <span class="text-sm ${nameClass} whitespace-nowrap shrink-0">${s.user} ${isMe ? '<span class="text-[10px] uppercase ml-1 opacity-60">(Tú)</span>' : ''}</span>
+                                ${s.note ? `<span class="text-[9px] text-amber-600 dark:text-amber-400 font-bold break-words whitespace-normal leading-tight flex-1 text-center px-2" title="${s.note}">${s.note}</span>` : ''}
+                            </div>
+                            <span class="${badgeClass} shrink-0 px-3 py-1 rounded-xl font-black text-sm tracking-tight shadow-sm border ${sTextClass}">${sIsEmpty ? '---' : s.code}</span>
                         `;
                         listEl.appendChild(item);
                     });
