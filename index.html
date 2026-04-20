@@ -77,20 +77,21 @@
                 </div>
                 <div>
                     <h1 class="text-sm font-extrabold uppercase tracking-tight text-slate-800 dark:text-white">Turnos AP 2026</h1>
-                    <p class="text-[8px] font-bold text-indigo-500 leading-none uppercase">v73 - <span id="sync-status">SIN DATOS</span></p>
+                    <p class="text-[10px] font-bold text-indigo-500 leading-none uppercase">v73 - <span id="sync-status">SIN DATOS</span></p>
                 </div>
             </div>
             <div class="flex gap-2 items-center">
                 <!-- Botón de información -->
-                <button onclick="document.getElementById('info-modal').classList.remove('hidden')" class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 transition-all active:scale-90 shadow-sm border border-blue-200 dark:border-blue-800" title="Información">
-                    <i class="fas fa-info text-xs w-3 text-center"></i>
+                <button onclick="document.getElementById('info-modal').classList.remove('hidden')" class="px-4 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 transition-all active:scale-90 shadow-sm border border-blue-200 dark:border-blue-800" title="Información">
+                    <i class="fas fa-info text-base w-5 text-center"></i>
                 </button>
                 <!-- Botón de actualización manual -->
-                <button id="btn-update-excel" onclick="descargarDesdeDropbox(true)" class="hidden p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 transition-all active:scale-90 shadow-sm border border-emerald-200 dark:border-emerald-800" title="Sincronizar con Dropbox">
-                    <i id="sync-icon" class="fas fa-cloud-download-alt text-xs"></i>
+                <button id="btn-update-excel" onclick="descargarDesdeDropbox(true)" class="hidden px-4 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 transition-all active:scale-90 shadow-sm border border-emerald-200 dark:border-emerald-800" title="Sincronizar con Dropbox">
+                    <i id="sync-icon" class="fas fa-cloud-download-alt text-base w-5 text-center"></i>
                 </button>
-                <button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 transition-all active:scale-90">
-                    <i id="theme-icon" class="fas fa-moon text-indigo-600 dark:text-yellow-400 text-xs"></i>
+                <!-- Botón de tema oscuro -->
+                <button id="theme-toggle" class="px-4 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 transition-all active:scale-90 shadow-sm border border-slate-200 dark:border-slate-700" title="Cambiar Tema">
+                    <i id="theme-icon" class="fas fa-moon text-indigo-600 dark:text-yellow-400 text-base w-5 text-center"></i>
                 </button>
             </div>
         </div>
@@ -162,16 +163,43 @@
         </div>
     </main>
 
-    <!-- Modal de Información -->
+    <!-- Modal de Información (Tutorial Completo) -->
     <div id="info-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in" onclick="this.classList.add('hidden')">
-        <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-2xl max-w-xs w-full text-center border dark:border-darkBorder relative" onclick="event.stopPropagation()">
-            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-info text-blue-600 dark:text-blue-400 text-xl"></i>
+        <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-2xl max-w-sm w-full border dark:border-darkBorder relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book text-blue-600 dark:text-blue-400 text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">Cómo funciona</h3>
+                </div>
+                <button onclick="document.getElementById('info-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-            <h3 class="text-lg font-black text-slate-800 dark:text-white mb-2 uppercase tracking-tight">Información</h3>
-            <p class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">He creado un sistema automático que actualiza los turnos los lunes, miércoles y viernes a las 20:00.</p>
-            <button onclick="document.getElementById('info-modal').classList.add('hidden')" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-xs tracking-wider transition-colors active:scale-95">
-                Entendido
+            
+            <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+                <!-- Sincronización -->
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+                    <h4 class="font-bold text-slate-800 dark:text-white mb-1 flex items-center gap-2"><i class="fas fa-sync-alt text-emerald-500"></i> Actualización automática</h4>
+                    <p class="text-xs leading-relaxed">He creado un sistema automático que actualiza los turnos los <strong>lunes, miércoles y viernes a las 20:00</strong> desde la nube. También puedes forzar la recarga con el botón <i class="fas fa-cloud-download-alt mx-1 opacity-70"></i> de arriba.</p>
+                </div>
+
+                <!-- Detalle Semana -->
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+                    <h4 class="font-bold text-slate-800 dark:text-white mb-1 flex items-center gap-2"><i class="fas fa-hand-pointer text-blue-500"></i> Toca una semana</h4>
+                    <p class="text-xs leading-relaxed">Al pulsar sobre cualquier semana, se abrirá el cuadrante detallado donde podrás ver:</p>
+                    <ul class="text-xs list-disc pl-4 mt-1 space-y-1">
+                        <li>Si hay alguna nota especial (aparecerá arriba).</li>
+                        <li>El total de personal (<strong>TOTAL AP</strong>) trabajando esa semana (descontando V, H, E y vacíos).</li>
+                        <li>Qué turno tiene cada compañero, ordenados de PM a CTT.</li>
+                        <li>Pequeñas notas individuales junto al nombre del compañero si las hay.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button onclick="document.getElementById('info-modal').classList.add('hidden')" class="w-full mt-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-xs tracking-wider transition-colors active:scale-95">
+                ¡Entendido!
             </button>
         </div>
     </div>
@@ -592,7 +620,7 @@
 
         function updateThemeIcon() {
             const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('theme-icon').className = isDark ? 'fas fa-sun text-yellow-400' : 'fas fa-moon text-indigo-600';
+            document.getElementById('theme-icon').className = isDark ? 'fas fa-sun text-yellow-400 text-base w-5 text-center' : 'fas fa-moon text-indigo-600 text-base w-5 text-center';
         }
 
         window.onload = () => {
